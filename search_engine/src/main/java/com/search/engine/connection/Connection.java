@@ -12,7 +12,7 @@ public class Connection {
 		  emfactory = Persistence.createEntityManagerFactory( "document_persistence" );
 	      
 	      EntityManager entitymanager = emfactory.createEntityManager( );
-	      entitymanager.getTransaction( ).begin( );
+	    
 	      return entitymanager;
 	}
 	

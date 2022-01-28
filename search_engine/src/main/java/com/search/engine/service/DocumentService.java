@@ -1,6 +1,7 @@
 package com.search.engine.service;
 
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +15,7 @@ import com.search.engine.readInput.ReadInput;
 
 public class DocumentService {
 
-	public void addDocument(Map<String, String> map) {
+	public void execute(LinkedHashMap<String, String> map) {
 
 		EntityManager entityManager = Connection.createConnection();
 
@@ -22,27 +23,30 @@ public class DocumentService {
 			Iterator<Map.Entry<String, String>> iterator = map.entrySet().iterator();
 			while (iterator.hasNext()) {
 				Map.Entry<String, String> entry = iterator.next();
-				
-				if(ReadInput.isNumeric(entry.getKey())) {//index command
-				Document document = entityManager.find(Document.class, entry.getKey());
 
-				if (document != null) {
-					document.setToken(document.getToken() + " " + entry.getValue());
-					entityManager.merge(document); 
+				entityManager.getTransaction().begin();
 
-				} else {
-					document = new Document();
-					document.setId(Integer.parseInt(entry.getKey()));
-					document.setToken(entry.getValue());
-					entityManager.persist(document);
+				String k = entry.getKey();
+				if (ReadInput.isNumeric(entry.getKey())) {// index command
+					Document document = entityManager.find(Document.class, Integer.parseInt(entry.getKey()));
+
+					if (document != null) {
+						document.setToken(document.getToken() + " " + entry.getValue());
+						entityManager.merge(document);
+
+					} else {
+						document = new Document();
+						document.setId(Integer.parseInt(entry.getKey()));
+						document.setToken(entry.getValue());
+						entityManager.persist(document);
+					}
+					entityManager.getTransaction().commit();
+					System.out.println(ExceptionMessage.INDEX_OK + entry.getKey());
+				} else {// query command
+
+					this.search(entry.getValue(), entityManager);
+
 				}
-				entityManager.getTransaction().commit();
-				System.out.println(ExceptionMessage.INDEX_OK+entry.getKey());
-			}else {//query command
-				
-				this.search(entry.getValue(), entityManager);
-				
-			}
 			}
 		} catch (Exception e) {
 			Connection.closeConnection(entityManager);
@@ -53,24 +57,29 @@ public class DocumentService {
 
 	}
 
-	private void search(String expression,EntityManager entityManager) {
-		Query query = entityManager.createNativeQuery("SELECT d.id FROM search_engine.documents d WHERE MATCH(token) AGAINST(:token in BOOLEAN MODE)");
+	private void search(String expression, EntityManager entityManager) {
+		Query query = entityManager.createNativeQuery(
+				"SELECT d.id FROM search_engine.documents d WHERE MATCH(token) AGAINST(:token in BOOLEAN MODE) order by id");
 		query.setParameter("token", this.expressionBuilder(expression));
+
 		List<Integer> result = query.getResultList();
-		System.out.print(ExceptionMessage.QUERY_RESULTS);
-		for(int d : result) {
-			System.out.print(" "+d);
+		System.out.print(ExceptionMessage.QUERY_RESULTS+" "+expression);
+		for (int d : result) {
+			System.out.print(" " + d);
 		}
-		
+		System.out.print("\n");
+		entityManager.getTransaction().commit();
 	}
-	
+
 	private String expressionBuilder(String expression) {
-		String exp="";
+		String exp = "";
 		String[] split = expression.split("&");
-		for(String s : split) {
-			exp+=("+"+s.replace("|", " ")+" ");
+		if(split.length > 1) {
+		for (String s : split) {
+			exp += ("+" + s + " ");
 		}
-		
-		return exp;
+		return exp.replace("|", " ");
+		}
+		return expression.replace("|", " ");
 	}
 }

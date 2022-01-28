@@ -1,20 +1,17 @@
 package com.search.engine.readInput;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedHashMap;
 import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 
 import com.search.engine.exception.ExceptionMessage;
-import com.sun.javafx.fxml.expression.Expression;
 
 public class ReadInput {
 
 	private String regexQuery ="(?=^([^()]*\\([^()]*\\))*[^()]*$)^[ A-Za-z0-9|&()]*$";
 	private String regexIndex = "^[a-zA-Z0-9]+$";
-	private Map<String, String> map;
-
+	private LinkedHashMap<String, String> map;
+	private int count = 0;
 	public void print() {
 
 		System.out.println(" -------------------------------------------------------------------------");
@@ -25,10 +22,11 @@ public class ReadInput {
 		String seq = sc.nextLine();
 		boolean read = true;
 
-		map = new HashMap<>();
+		map = new LinkedHashMap<>();
 
 		while (read) {
 			if (isNumeric(seq)) {
+				System.out.print("\n  Enter your commands  \n");
 				Integer s = Integer.parseInt(seq);
 				for (int i = 1; i <= s; i++) {
 					String command = sc.nextLine();
@@ -59,7 +57,7 @@ public class ReadInput {
 	private boolean validate(String command) {
 		String[] split = command.split(" ");
 
-		int count = 0;
+	
 		if (!split[0].equalsIgnoreCase("index") && !split[0].equalsIgnoreCase("query")) {
 
 			System.out.println(" \n  index error " + split[0] + ExceptionMessage.NON_VALID_COMMAND);
@@ -93,6 +91,8 @@ public class ReadInput {
 			System.out.println(ExceptionMessage.NON_CORRECT_USAGE_QUERY);
 		}else if(split[1].startsWith("|") || split[1].startsWith("&") || split[1].endsWith("|") || split[1].endsWith("&")) {
 			System.out.println(ExceptionMessage.QUERY_NOT_CORRECT);
+		}else if(split[1].contains("()")) {
+			System.out.println(ExceptionMessage.QUERY_NOT_CORRECT);
 		}else {
 			count++;
 			map.put(split[0]+count, split[1]);
@@ -100,7 +100,7 @@ public class ReadInput {
 		return true;
 	}
 
-	public Map<String, String> getMap() {
+	public LinkedHashMap<String, String> getMap() {
 		return map;
 	}
 }

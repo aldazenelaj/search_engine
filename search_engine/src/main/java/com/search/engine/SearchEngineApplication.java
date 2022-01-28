@@ -1,5 +1,6 @@
 package com.search.engine;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Scanner;
@@ -18,37 +19,21 @@ import com.search.engine.readInput.ReadInput;
 import com.search.engine.service.DocumentService;
 
 public class SearchEngineApplication {
-	
-//	@Autowired
-//	static DocumentService service;
-	
+
 	@Autowired
 	static ReadInput input;
-	
-	public static void main(String[] args) {	
+
+	public static void main(String[] args) {
 		InitializeProperties.initialize(args);
-		
+
 		input = new ReadInput();
 		input.print();
-		
-		Map<String, String> map = input.getMap();
-		
-		 DocumentService service = new DocumentService();
-		service.addDocument(map);
-		
-//		 EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "document_persistence" );
-//	      
-//	      EntityManager entitymanager = emfactory.createEntityManager( );
-//	      entitymanager.getTransaction( ).begin( );
-//	      Document d = new Document();
-//	      d.setId(Integer.parseInt(str));
-//	      d.setToken("hhhh");
-//	      
-//	      entitymanager.persist( d );
-//	      entitymanager.getTransaction( ).commit( );
 
-//	      entitymanager.close( );
-//	      emfactory.close( );
+		LinkedHashMap<String, String> map = input.getMap();
+
+		DocumentService service = new DocumentService();
+		service.execute(map);
+
 	}
 
 }
