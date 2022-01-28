@@ -31,7 +31,7 @@ public class SearchEngineApplication {
 		input = new ReadInput();
 		input.print();
 		
-		Map<Integer, String> map = input.getMap();
+		Map<String, String> map = input.getMap();
 		
 		 DocumentService service = new DocumentService();
 		service.addDocument(map);
