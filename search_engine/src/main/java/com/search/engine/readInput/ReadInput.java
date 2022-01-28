@@ -8,7 +8,9 @@ import com.search.engine.exception.ExceptionMessage;
 
 public class ReadInput {
 
-	private String regexQuery ="(?=^([^()]*\\([^()]*\\))*[^()]*$)^[ A-Za-z0-9|&()]*$";
+//	private String regexQuery ="(?=^([^()]*\\([^()]*\\))*[^()]*$)^[ A-Za-z0-9|&(())]*$";
+	private String regexQuery ="^[ A-Za-z0-9|&(())]*$";
+//	private String regexQuery ="(?=\\(([^\\)]+)\\)*$)^[ A-Za-z0-9|&(())]*$";
 	private String regexIndex = "^[a-zA-Z0-9]+$";
 	private LinkedHashMap<String, String> map;
 	private int count = 0;
@@ -87,7 +89,7 @@ public class ReadInput {
 			map.put(split[1], token.trim());
 		} else if (split[0] != null && split[0].equalsIgnoreCase("query") && split.length != 2) {
 			System.out.println(ExceptionMessage.NON_CORRECT_USAGE_QUERY);
-		}else if(!split[1].matches(regexQuery)) {
+		}else if(!split[1].matches(regexQuery) && !split[1].matches("\\(([^\\)]+)\\)")) {
 			System.out.println(ExceptionMessage.NON_CORRECT_USAGE_QUERY);
 		}else if(split[1].startsWith("|") || split[1].startsWith("&") || split[1].endsWith("|") || split[1].endsWith("&")) {
 			System.out.println(ExceptionMessage.QUERY_NOT_CORRECT);

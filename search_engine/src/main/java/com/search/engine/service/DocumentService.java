@@ -8,6 +8,8 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
+import org.springframework.util.StringUtils;
+
 import com.search.engine.connection.Connection;
 import com.search.engine.entity.Document;
 import com.search.engine.exception.ExceptionMessage;
@@ -63,7 +65,7 @@ public class DocumentService {
 		query.setParameter("token", this.expressionBuilder(expression));
 
 		List<Integer> result = query.getResultList();
-		System.out.print(ExceptionMessage.QUERY_RESULTS+" "+expression);
+		System.out.print(ExceptionMessage.QUERY_RESULTS + " " + expression);
 		for (int d : result) {
 			System.out.print(" " + d);
 		}
@@ -74,11 +76,33 @@ public class DocumentService {
 	private String expressionBuilder(String expression) {
 		String exp = "";
 		String[] split = expression.split("&");
-		if(split.length > 1) {
-		for (String s : split) {
-			exp += ("+" + s + " ");
-		}
-		return exp.replace("|", " ");
+		if (split.length > 1) {
+			int index = 0;
+			for (String s : split) {
+
+				Integer c = StringUtils.countOccurrencesOf(s, "(");
+				Integer start = s.lastIndexOf("(");
+				String newS = "";
+
+				if ((start != -1 && index != 0 && split[index - 1] != null
+						&& ((!split[index - 1].substring(split[index - 1].length() - 1).equals(")"))))) {
+					newS = s.substring(0, start);
+					newS += ("+(" + s.substring(start + 1));
+					exp += newS;
+				} else if (start != -1 && s.substring(s.length() - 1).equals(")")) {
+					newS = s.substring(0, start);
+					newS += ("+(" + s.substring(start + 1));
+					exp += newS;
+				} else if (start != -1) {
+					newS = s.substring(0, start);
+					newS += ("(+" + s.substring(start + 1));
+					exp += newS;
+				} else {
+					exp += ("+" + s + " ");
+				}
+				index++;
+			}
+			return exp.replace("|", " ");
 		}
 		return expression.replace("|", " ");
 	}
